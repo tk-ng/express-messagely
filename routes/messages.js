@@ -15,14 +15,14 @@ const ExpressError = require("../expressError");
  * Make sure that the currently-logged-in users is either the to or from user.
  *
  **/
-router.get(":id", ensureLoggedIn, async (req, res, next) => {
+router.get("/:id", ensureLoggedIn, async (req, res, next) => {
 	try {
 		const message = await Message.get(req.params.id);
 		if (
 			message.from_user.username !== req.user.username &&
 			message.to_user.username !== req.user.username
 		) {
-			throw ExpressError("Unauthorized", 401);
+			throw new ExpressError("Unauthorized", 401);
 		}
 		return res.json({ message });
 	} catch (err) {
@@ -54,14 +54,14 @@ router.post("/", ensureLoggedIn, async (req, res, next) => {
  * Make sure that the only the intended recipient can mark as read.
  *
  **/
-router.post(":/id/read", ensureLoggedIn, async (req, res, next) => {
+router.post("/:id/read", ensureLoggedIn, async (req, res, next) => {
 	try {
 		const msg = await Message.get(req.params.id);
 		if (msg.to_user.username === req.user.username) {
 			const message = await Message.markRead(req.params.id);
 			return res.json({ message });
 		}
-		throw ExpressError("Unauthorized", 401);
+		throw new ExpressError("Unauthorized", 401);
 	} catch (err) {
 		return next(err);
 	}
